@@ -1,0 +1,31 @@
+# ????
+server:
+
+  port: 80
+
+  tomcat:
+    basedir: .
+    accesslog:
+      enabled: true
+      directory: accesslogs
+      suffix: .log
+      prefix: access_log
+      file-date-format: .yyyy-MM-dd
+      pattern: "%{yyyy-MM-dd HH:mm:ss.SSS}t %s %r %{User-Agent}i %{Referer}i %a %b %D"
+
+
+
+
+# ????
+logging:
+
+ # pattern:
+ #   file: "[%d{HH:mm:ss.SSS}][%-5level][%logger.%method:line%line] - %msg%n"
+ #   rolling-file-name: "logs/ap.%d{yyyy-MM-dd}.%i"
+
+  file:
+    name: logs/ap.log
+    max-history: 10
+
+  level:
+    root: INFO
