@@ -1,7 +1,6 @@
-# ????
 server:
 
-  port: 80
+  port: 8080
 
   tomcat:
     basedir: .
@@ -16,12 +15,11 @@ server:
 
 
 
-# ????
 logging:
 
- # pattern:
+  pattern:
  #   file: "[%d{HH:mm:ss.SSS}][%-5level][%logger.%method:line%line] - %msg%n"
- #   rolling-file-name: "logs/ap.%d{yyyy-MM-dd}.%i"
+    rolling-file-name: "logs/ap.%d{yyyy-MM-dd}.%i"
 
   file:
     name: logs/ap.log
