@@ -1,25 +1,32 @@
+# 서버설정
 server:
 
+  # 서비스포트
   port: 8080
 
+  # 톰캣설정
   tomcat:
+
     basedir: .
+
     accesslog:
       enabled: true
+      pattern: '%{host}i %h %l %u %t "%r" %s %b %D "%{User-Agent}i"'
       directory: accesslogs
       suffix: .log
       prefix: access_log
-      file-date-format: .yyyy-MM-dd
-      pattern: "%{yyyy-MM-dd HH:mm:ss.SSS}t %s %r %{User-Agent}i %{Referer}i %a %b %D"
+      max-days: 10
+      file-date-format: _yyyy-MM-dd
 
 
 
-
+# AP log설정
 logging:
 
   pattern:
- #   file: "[%d{HH:mm:ss.SSS}][%-5level][%logger.%method:line%line] - %msg%n"
-    rolling-file-name: "logs/ap.%d{yyyy-MM-dd}.%i"
+    console: '%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight(%-5level) [%thread] - %cyan(%logger{35}) : %msg%n'
+    file: '%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] - %logger{35} : %msg%n'
+    rolling-file-name: "logs/ap.log.%d{yyyy-MM-dd}.%i"
 
   file:
     name: logs/ap.log
