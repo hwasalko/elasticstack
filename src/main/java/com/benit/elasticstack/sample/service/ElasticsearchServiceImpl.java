@@ -231,13 +231,13 @@ public class ElasticsearchServiceImpl implements ElasticsearchService{
         fields.put("contents", contents);
         highlight.put("fields", fields);
 
-        pre_tags.add("★");
-        post_tags.add("★");
+        pre_tags.add("<mark>★");    // 검색어 prefix
+        post_tags.add("★</mark>");  // 검색어 suffix
         highlight.put("pre_tags", pre_tags);
         highlight.put("post_tags", post_tags);
         root.put("highlight", highlight);
 
-
+        log.info("  [kibana > Dev Tools 실행 1 line 쿼리] ===>   POST {}/_search {}", index_name, root.toJSONString() );
 
 
 

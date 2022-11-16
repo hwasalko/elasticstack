@@ -19,7 +19,8 @@
             <form id="frm" onsubmit="return false;">
 
                 <div style="width:100%">
-                    <label>검색어</label><br>
+                    <label>검색어</label>
+                    <br>
                     <input type="text" name="search_keyword" id="search_keyword" size="30">
                     <button onclick="callEsSearch()">검색</button>
                 </div>
@@ -27,7 +28,8 @@
                 <br>
 
                 <div>
-                    <label>검색결과</label><br>
+                    <label>검색결과</label> - <small>총 <span id="search_total_count">0</span>건 (처리시간 : <span id="search_time_ms">0</span>ms)</small>
+                    <br>
                     <table border="1" cellpadding="0" cellspacing="0" width="100%">
                         <thead>
                             <tr>
@@ -67,31 +69,45 @@
                     dataType : 'json',
                     data : $("#frm").serialize(),
                     success : function(data){
+
                         console.log(data);
 
-                        // 기존 TR 클리어
+                        // 1. 기존 TR 클리어
                         $("#search_result_tbody").children().remove();
 
-                        // json을 이용하여 결과 렌더링
+
+                        // 2. 응답 json을 이용하여 결과 렌더링
+
+                        // 2.1 총건수 및 처리소요시간 셋팅
+                        $("#search_total_count").html(data.hits.total.value);
+                        $("#search_time_ms").html(data.took);
+
+
+                        // 2.2 검색결과 목록 처리
                         let arrays = data.hits.hits;
                         arrays.forEach( function(row) {
 
-                            let reg_ddtm = row._source.reg_ddtm;
-                            let title = row._source.title;
-                            let contents = row.highlight.contents[0];
+                            let reg_ddtm = row._source.reg_ddtm;    // 등록일시
+                            let title = row._source.title;          // 제목
+                            let contents = row.highlight.contents;  // 내용(검색결과)
 
-                            console.log(reg_ddtm, title, contents);
+                            let temp_str="";
+                            contents.forEach( function(highlight_str) { // highlight 결과는 기본적으로 배열로 리턴됨
+                                temp_str +=  "<li>... " + highlight_str + " ...</li>";
+                            });
 
                             let html_str =
-                            "<tr>"
-                                + "<td>" + reg_ddtm + "</td>"
-                                + "<td>" + title + "</td>"
-                                + "<td>" + contents + "</td>"
-                            + "</tr>";
+                                  "<tr>"
+                                +   "<td>" + reg_ddtm + "</td>"
+                                +   "<td>" + title + "</td>"
+                                +   "<td>"
+                                +   "  <ul>" + temp_str + "</ul>"
+                                +   "</td>"
+                                + "</tr>";
 
                             $("#search_result_tbody").append( html_str ); // line 생성
 
-                        });
+                        }); // end forEach
 
                     },
                     error : function(request, status, error){
