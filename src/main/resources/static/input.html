@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="kr">
+    <head>
+        <meta charset="UTF-8">
+        <title>ES 색인페이지</title>
+    </head>
+    <body>
+
+        <header>
+            <h1> Elasticsearch 색인 페이지 입니다. </h1>
+        </header>
+
+        <hr>
+
+        <br>
+
+        <section>
+
+            <form id="frm" onsubmit="return false;">
+
+                <div style="width:100%">
+                    <label>제목</label><br>
+                    <input type="text" name="title" id="title" size="100">
+                </div>
+
+                <br>
+
+                <div>
+                    <label>내용</label><br>
+                    <textarea name="contents" id="contents" rows="30" cols="100"></textarea>
+                </div>
+
+                <div>
+                    <button onclick="callEsIndex()">색인</button>
+                    <button onclick="callEsConnectTest()">ES 접속테스트</button>
+                </div>
+
+            </form>
+
+        </section>
+
+
+        <br>
+        <br>
+        <br>
+
+        <hr>
+
+        <footer>
+
+            <label>---- 처리결과 출력 -----</label><br><br>
+            <div id="result" style="border: 1px dotted; padding: 10px; background-color: yellow;">
+                <span id="console_msg"></span>
+            </div>
+
+        </footer>
+
+
+
+
+        <!-- javascript 정의 영역 ---->
+        <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+        <script language="JavaScript">
+
+
+            function callEsConnectTest(){
+
+                const console_msg = document.querySelector("#console_msg");
+
+                // ES 접속테스트 호출
+                $.get({
+                    url : "/es/test",
+                    dataType : 'text',
+                    success : function(data){
+                        console.log(data);
+                        console_msg.innerText = data;
+                    },
+                    error : function(request, status, error){
+                        alert('ajax 통신 중 error 발생 : ' + error);
+                    }
+                });
+
+            }
+
+
+
+            function callEsIndex(){
+
+                // 1. 입력값 가져오기
+                let subject = document.querySelector("#title").value;
+                let contents = document.querySelector("#contents").value;
+                const console_msg = document.querySelector("#console_msg");
+
+
+
+                // 서버로 ES 색인요청
+                $.post({
+                    url : "/es/index",
+                    dataType : 'text',
+                    data : $("#frm").serialize(),
+                    success : function(data){
+                        console.log(data);
+                        console_msg.innerText = data;
+                    },
+                    error : function(request, status, error){
+                        alert('ajax 통신 중 error 발생 : ' + error);
+                    }
+                });
+            }
+
+        </script>
+
+
+
+    </body>
+</html>

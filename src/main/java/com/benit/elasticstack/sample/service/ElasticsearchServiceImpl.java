@@ -5,6 +5,7 @@ import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.ElasticsearchTransport;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
+import com.benit.elasticstack.sample.dto.Board;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpHost;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
@@ -13,19 +14,19 @@ import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.elasticsearch.client.RestClient;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.json.GsonJsonParser;
 import org.springframework.boot.json.JsonParser;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.json.JsonObject;
 import javax.net.ssl.SSLContext;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
@@ -99,6 +100,165 @@ public class ElasticsearchServiceImpl implements ElasticsearchService{
     }
 
 
+
+
+
+
+
+    /**
+     * ES 색인 서비스
+     * @param board
+     * @return
+     * @throws KeyStoreException
+     * @throws NoSuchAlgorithmException
+     * @throws KeyManagementException
+     */
+    public String es_rest_index(Board board) throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException{
+
+        // 초기화
+        RestTemplate restTemplate = makeRestTemplate();
+
+
+
+        // *********** 1. Request *****************
+
+        // Request URI 셋팅
+        String index_name = "my_nori_ap";
+        UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl( es_protocol + "://" + es_host + ":" + es_port + "/" + index_name + "/_doc").build(true);
+
+        // Request Header 설정
+        HttpHeaders requestHeader = new HttpHeaders();
+        requestHeader.setBasicAuth(es_user_id, es_user_pw); // 인가를 위한 ID/PW 셋팅
+        requestHeader.setContentType(MediaType.APPLICATION_JSON); // 컨텐트타입 설정(json body)
+
+
+        // Request Entity 설정
+        HttpEntity<Board> requestHttpEntity = new HttpEntity<>(board, requestHeader);
+
+
+        // Request 요청
+        log.info("  [request URI] {}", uriComponents.toUriString());
+        log.info("  [request header] {}", requestHttpEntity );
+        ResponseEntity<String> responseEntity = restTemplate.exchange( uriComponents.toUriString(), HttpMethod.POST, requestHttpEntity, String.class );
+
+
+
+        // *********** 2. Response *****************
+        log.info("  [response statuscode] {}", responseEntity.getStatusCode());
+        log.info("  [response body] {}", responseEntity.getBody());
+
+        return responseEntity.getBody();
+
+    }
+
+
+
+    /**
+     * ES 검색 서비스
+     * @param search_keyword
+     * @return
+     * @throws KeyStoreException
+     * @throws NoSuchAlgorithmException
+     * @throws KeyManagementException
+     */
+    /*
+    POST my_nori_ap/_search
+    {
+      "query": {
+        "match": {
+          "contents": "테스트"
+        }
+      },
+      "_source": {
+        "excludes": "contents"
+      },
+      "highlight": {
+        "fields": {
+          "contents": {}
+        },
+        "pre_tags": [
+          "★"
+        ],
+        "post_tags": [
+          "★"
+        ]
+      }
+    }
+     */
+    public String es_rest_search(String search_keyword) throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException{
+
+        // 초기화
+        RestTemplate restTemplate = makeRestTemplate();
+
+
+
+        // *********** 1. Request *****************
+
+        // Request URI 셋팅
+        String index_name = "my_nori_ap";
+        UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl( es_protocol + "://" + es_host + ":" + es_port + "/" + index_name + "/_search").build(true);
+
+        // Request Header 설정
+        HttpHeaders requestHeader = new HttpHeaders();
+        requestHeader.setBasicAuth(es_user_id, es_user_pw); // 인가를 위한 ID/PW 셋팅
+        requestHeader.setContentType(MediaType.APPLICATION_JSON); // 컨텐트타입 설정(json body)
+
+
+
+        // Request Param 설정
+        JSONObject root = new JSONObject();
+
+        JSONObject query = new JSONObject();
+        JSONObject match = new JSONObject();
+
+        match.put("contents", search_keyword); // 검색어 주입
+        query.put("match", match);
+        root.put("query", query);
+
+
+        JSONObject _source = new JSONObject();
+        _source.put("excludes", "contents"); // 원문은 size가 크기때문에 리턴결과에서 제외
+        root.put("_source", _source);
+
+
+
+        JSONObject highlight = new JSONObject();
+        JSONObject fields = new JSONObject();
+        JSONObject contents = new JSONObject();
+        JSONArray pre_tags = new JSONArray();
+        JSONArray post_tags = new JSONArray();
+
+        fields.put("contents", contents);
+        highlight.put("fields", fields);
+
+        pre_tags.add("★");
+        post_tags.add("★");
+        highlight.put("pre_tags", pre_tags);
+        highlight.put("post_tags", post_tags);
+        root.put("highlight", highlight);
+
+
+
+
+
+        // Request Entity 설정
+        HttpEntity<String> requestHttpEntity = new HttpEntity<>(root.toJSONString(), requestHeader);
+
+
+        // Request 요청
+        log.info("  [request URI] {}", uriComponents.toUriString());
+        log.info("  [request header] {}", requestHttpEntity );
+        ResponseEntity<String> responseEntity = restTemplate.exchange( uriComponents.toUriString(), HttpMethod.POST, requestHttpEntity, String.class );
+
+
+
+        // *********** 2. Response *****************
+        log.info("  [response statuscode] {}", responseEntity.getStatusCode());
+        log.info("  [response body] {}", responseEntity.getBody());
+
+        return responseEntity.getBody();
+
+    }
 
 
 

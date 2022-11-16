@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="kr">
+    <head>
+        <meta charset="UTF-8">
+        <title>ES 검색페이지</title>
+    </head>
+    <body>
+
+        <header>
+            <h1> Elasticsearch 검색 페이지 입니다. </h1>
+        </header>
+
+        <hr>
+
+        <br>
+
+        <section>
+
+            <form id="frm" onsubmit="return false;">
+
+                <div style="width:100%">
+                    <label>검색어</label><br>
+                    <input type="text" name="search_keyword" id="search_keyword" size="30">
+                    <button onclick="callEsSearch()">검색</button>
+                </div>
+
+                <br>
+
+                <div>
+                    <label>검색결과</label><br>
+                    <table border="1" cellpadding="0" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th width="20%" bgcolor="lightgray">등록일시</th>
+                                <th width="20%" bgcolor="lightgray">제목</th>
+                                <th bgcolor="lightgray">검색결과</th>
+                            </tr>
+                        </thead>
+                        <tbody id="search_result_tbody"></tbody>
+                    </table>
+                </div>
+
+                <br>
+                <br>
+
+
+            </form>
+
+        </section>
+
+
+
+
+
+        <!-- javascript 정의 영역 ---->
+        <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+        <script language="JavaScript">
+
+
+            function callEsSearch(){
+
+
+
+                // 서버로 ES 색인요청
+                $.post({
+                    url : "/es/search",
+                    dataType : 'json',
+                    data : $("#frm").serialize(),
+                    success : function(data){
+                        console.log(data);
+
+                        // 기존 TR 클리어
+                        $("#search_result_tbody").children().remove();
+
+                        // json을 이용하여 결과 렌더링
+                        let arrays = data.hits.hits;
+                        arrays.forEach( function(row) {
+
+                            let reg_ddtm = row._source.reg_ddtm;
+                            let title = row._source.title;
+                            let contents = row.highlight.contents[0];
+
+                            console.log(reg_ddtm, title, contents);
+
+                            let html_str =
+                            "<tr>"
+                                + "<td>" + reg_ddtm + "</td>"
+                                + "<td>" + title + "</td>"
+                                + "<td>" + contents + "</td>"
+                            + "</tr>";
+
+                            $("#search_result_tbody").append( html_str ); // line 생성
+
+                        });
+
+                    },
+                    error : function(request, status, error){
+                        alert('ajax 통신 중 error 발생 : ' + error);
+                    }
+                });
+            }
+
+        </script>
+
+
+
+    </body>
+</html>
