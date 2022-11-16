@@ -24,14 +24,18 @@ public class ElasticsearchController {
 
     /**
      * ES 접속테스트
+     *  - Dev Tools 기준 "GET /" 호출결과와 동일
+     *  - ES info를 json으로 리턴
      * @return
      */
     @GetMapping("/es/test")
     public String EsConnect() throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
         String now = LocalDateTime.now().toString();
-        log.info("ES 접속테스트 호출!! 결과 : {}     /     현재시각 -> {}", elasticsearchService.es_rest_connect(), now);
+        String response = elasticsearchService.es_rest_connect();
+        log.info("ES 접속테스트 호출!! 현재시각 -> {}", now);
+        log.info("Response => \n{}", response);
 
-        return "ES 접속테스트 호출!! 현재시각 ->" + now;
+        return response;
     }
 
 }

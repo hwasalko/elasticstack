@@ -10,6 +10,6 @@ public interface ElasticsearchService {
 
     public boolean es_connect();
 
-    public boolean es_rest_connect() throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException;
+    public String es_rest_connect() throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException;
 
 }

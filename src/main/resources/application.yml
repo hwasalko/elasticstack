@@ -34,3 +34,16 @@ logging:
 
   level:
     root: INFO
+
+
+
+# AP에서 사용하는 프로퍼티
+elasticsearch:
+
+  host: 152.70.235.78
+  protocol: https
+  port: 9200
+
+  user:
+    id: elastic
+    pw: 1qazxsw2!
