@@ -1,11 +1,11 @@
 package com.benit.elasticstack.sample.controller;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
+@Slf4j
 @Controller
 public class UIController {
 
@@ -16,7 +16,8 @@ public class UIController {
      */
     @GetMapping("/input")
     public String inputUI(){
-        return "input.html";
+        log.info("ES 색인화면으로 이동합니다.");
+        return "/input.html";
     }
 
 
@@ -26,7 +27,8 @@ public class UIController {
      */
     @GetMapping("/search")
     public String searchUI(){
-        return "search.html";
+        log.info("ES 검색화면으로 이동합니다.");
+        return "/search.html";
     }
 
 }
